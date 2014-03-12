@@ -6,6 +6,8 @@
 #include <cstdlib>
 using namespace std;
 
+const int block_size = 3;
+
 void nested_loop_join(ifstream &a, ifstream &b, ofstream &out);
 void sort_merge_join(ifstream &a, ifstream &b, ofstream &out);
 
@@ -36,18 +38,30 @@ int main()
 
 void nested_loop_join(ifstream &a, ifstream &b, ofstream &out)
 {
+        char a_block[block_size];
+        char b_block[block_size];
+
 	while(a.good())
 	{
-		string a_line;
-		getline(a, a_line);
+		a.read(a_block, block_size);
+                a.ignore(1);
 		while(b.good())
 		{
-			string b_line;
-			getline(b, b_line);
-			if(a.good() && b.good() && a_line == b_line)
+			b.read(b_block, block_size);
+                        b.ignore(1);
+                        bool eq = true;
+                        for(int i = 0; i < block_size; i++)
+                        {
+                            if(a_block[i] != b_block[i])
+                            {
+                                eq = false;
+                                break;
+                            }
+                        }
+                        if(eq && a.good() && b.good())
 			{
-				out << a_line << endl;
-				cout << a_line << endl;
+				out.write(a_block, block_size);
+                                out << endl;
 			}
 		}
 		b.clear();
@@ -55,4 +69,3 @@ void nested_loop_join(ifstream &a, ifstream &b, ofstream &out)
 	}
 	return;
 }
-
