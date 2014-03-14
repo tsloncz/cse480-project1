@@ -11,114 +11,105 @@ void sort_merge_join(ifstream &a, ifstream &b, ofstream &out);
 
 int main()
 {
-    ifstream a("a.txt");
-    ifstream b("b.txt");
-    ofstream nlj("nested-loop-join.txt");
-    ofstream smj("sort-merge-join.txt");
+    ifstream r("R.txt");
+    ifstream s("S.txt");
+    ofstream t("T.txt");
         
-    if(!a)
+    if(!r)
     {
-        cout << "Unable to open file a.txt" << endl;
+        cout << "Unable to open file R.txt" << endl;
     }
-    if(!b)
+    if(!s)
     {
-        cout << "Unable to open file b.txt" << endl;
+        cout << "Unable to open file S.txt" << endl;
     }
-    if(!nlj)
+    if(!t)
     {
-        cout << "Unable to create file nested-loop-join.txt" << endl;
-    }
-    if(!smj)
-    {
-        cout << "Unable to create file sort-merge-join.txt" << endl;
+        cout << "Unable to write to file T.txt" << endl;
     }
 
-    nested_loop_join(a, b, nlj);
+    sort_merge_join(r, s, t);
 
-    a.clear();
-    a.seekg(0);
-    b.clear();
-    b.seekg(0);
-
-    sort_merge_join(a, b, smj);
-
-    a.close();
-    b.close();
-    nlj.close();
-    smj.close();
+    r.close();
+    s.close();
+    t.close();
     return 0;
 }
 
-void nested_loop_join(ifstream &a, ifstream &b, ofstream &out)
+void nested_loop_join(ifstream &r, ifstream &s, ofstream &t)
 {
-    char a_block[block_size + 1];
-    char b_block[block_size + 1];
-    a_block[block_size] = '\0';
-    b_block[block_size] = '\0';
+    char r_block[block_size + 1];
+    char s_block[block_size + 1];
+    r_block[block_size] = '\0';
+    s_block[block_size] = '\0';
 
-    while(a.good())
+    while(r.good())
     {
-        a.read(a_block, block_size);
-        a.ignore(1);
-        while(b.good())
+        r.read(r_block, block_size);
+        r.ignore(1);
+        while(s.good())
         {
-            b.read(b_block, block_size);
-            b.ignore(1);
-            if(strcmp(a_block, b_block) == 0 && a.good()
-               && b.good())
+            s.read(s_block, block_size);
+            s.ignore(1);
+            if(strcmp(r_block, s_block) == 0 && r.good()
+               && s.good())
             {
-                out.write(a_block, block_size);
-                out << endl;
+                t.write(r_block, block_size);
+                t << ", ";
+                t.write(s_block, block_size);
+                t << endl;
             }
         }
-        b.clear();
-        b.seekg(0);
+        s.clear();
+        s.seekg(0);
     }
     return;
 }
 
 // Assume files are sorted for now
-void sort_merge_join(ifstream &a, ifstream &b, ofstream &out)
+void sort_merge_join(ifstream &r, ifstream &s, ofstream &t)
 {
-    char a_block[block_size + 1];
-    char b_block[block_size + 1];
-    a_block[block_size] = '\0';
-    b_block[block_size] = '\0';
-    bool read_from_a = true;
-    bool read_from_b = true;
-    while(a.good() && b.good())
+    char r_block[block_size + 1];
+    char s_block[block_size + 1];
+    r_block[block_size] = '\0';
+    s_block[block_size] = '\0';
+    bool read_from_r = true;
+    bool read_from_s = true;
+    while(r.good() && s.good())
     {
-        if(read_from_a)
+        if(read_from_r)
         {
-            a.read(a_block, block_size);
-            a.ignore(1);
+            r.read(r_block, block_size);
+            r.ignore(1);
         }
-        if(read_from_b)
+        if(read_from_s)
         {        
-            b.read(b_block, block_size);
-            b.ignore(1);
+            s.read(s_block, block_size);
+            s.ignore(1);
         }
 
-        int a_number = atoi(a_block);
-        int b_number = atoi(b_block);
-        if(a.good() && b.good())
+        int r_number = atoi(r_block);
+        int s_number = atoi(s_block);
+        if(r.good() && s.good())
         {
-            if(a_number == b_number)
+            if(r_number == s_number)
             {
-                out.write(a_block, block_size);
-                out << endl;
-                read_from_a = true;
-                read_from_b = true;
+                t.write(r_block, block_size);
+                t << ", ";
+                t.write(s_block, block_size);
+                t << endl;
+                read_from_r = true;
+                read_from_s = true;
             }
-            else if(a_number < b_number)
+            else if(r_number < s_number)
             {
-                read_from_a = true;
-                read_from_b = false;
+                read_from_r = true;
+                read_from_s = false;
             }
-            else if(a_number > b_number)
+            else if(r_number > s_number)
             {
-                read_from_a = false;
-                read_from_b = true;
+                read_from_r = false;
+                read_from_s = true;
             }
         }
     }
