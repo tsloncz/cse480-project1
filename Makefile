@@ -1,4 +1,2 @@
-proj1: main.o
-	g++ -o proj1 main.o
-main.o: main.cpp
-	g++ -c main.cpp
+proj1: main.cpp
+	g++ -o proj1 main.cpp
